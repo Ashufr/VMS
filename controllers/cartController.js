@@ -1,6 +1,7 @@
 import Cart from "../models/Cart.js";
 import Coupon from "../models/Coupon.js";
 import Product from "../models/Product.js";
+import { validateCoupon } from "./couponController.js";
 
 const getAllCarts = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ const getAllCarts = async (req, res) => {
   }
 };
 const getCart = async (req, res) => {
-  const { id } = req.params;
+  const id = req.user.cart;
   try {
     const cart = await Cart.findById(id).populate("products.product");
     res.json(cart);
@@ -36,7 +37,7 @@ const createCart = async (user) => {
 };
 
 const addProductToCart = async (req, res) => {
-  const { id } = req.params;
+  const  id  = req.user.cart;
   const { productId, quantity } = req.body;
 
   try {
@@ -50,6 +51,19 @@ const addProductToCart = async (req, res) => {
     if (!product) {
       res.status(404).json({ message: "Product not found" });
       return;
+    }
+
+    const couponId = cart.coupon;
+    if (couponId) {
+        const coupon = await Coupon.findById(couponId);
+        if (!coupon) {
+          res.status(404).json({ message: "Coupon not found" });
+          return;
+        }
+        if (!coupon.applicableCategories.includes(product.category.toString())) {
+          cart.coupon = null;
+        }
+        
     }
 
     const existingProductIndex = cart.products.findIndex(
@@ -69,8 +83,8 @@ const addProductToCart = async (req, res) => {
 };
 
 const applyCouponToCart = async (req, res) => {
-  const { id } = req.params;
-  const { couponCode } = req.body;
+  const  id  = req.user.cart;
+  const { couponId } = req.body;
 
   try {
     const cart = await Cart.findById(id).populate("products.product");
@@ -78,7 +92,7 @@ const applyCouponToCart = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    const coupon = await Coupon.findOne({ code: couponCode });
+    const coupon = await Coupon.findById(couponId);
     const user = req.user;
 
     if (!coupon) {
@@ -104,7 +118,7 @@ const applyCouponToCart = async (req, res) => {
 };
 
 const removeCouponFromCart = (req, res) => {
-  const { id } = req.params;
+  const  id  = req.user.cart;
   try {
     const cart = Cart.findById(id);
     if (!cart) {
@@ -121,7 +135,7 @@ const removeCouponFromCart = (req, res) => {
 };
 
 const removeProductFromCart = async (req, res) => {
-  const { id } = req.params;
+  const id = req.user.cart;
   const { productId } = req.body;
 
   try {
