@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  cart : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Cart'
+  }
 });
 
 userSchema.pre("save", async function(next) {

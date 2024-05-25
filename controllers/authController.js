@@ -31,11 +31,16 @@ const registerUser = async (req, res) => {
     products: [],
     coupon: null,
   })
+  user.cart = cart._id
+  await user.save()
+
+  const token = generateToken(user._id);
+
   if (user && cart) {
     res.status(201).json({
       _id: user._id,
       email: user.email,
-      token: generateToken(user._id),
+      token: token,
     });
   } else {
     res.status(400).json({ message: "Invalid user data" });
