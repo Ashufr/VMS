@@ -84,7 +84,9 @@ const getOrderDetails = async (req, res) => {
       res.status(404).json({ message: "Order not found" });
       return;
     }
-
+    if(order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
     res.json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -102,4 +104,16 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-export { createOrder, getOrderDetails, getAllOrders };
+const getAllUserOrders = async (req, res) => {
+  const userId  = req.user._id;
+  try {
+    const orders = await Order.find({ user: userId })
+      .populate("products.product")
+      .populate("coupon");
+    res.json(orders);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export { createOrder, getOrderDetails, getAllOrders, getAllUserOrders };
