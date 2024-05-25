@@ -36,15 +36,6 @@ const createOrder = async (req, res) => {
       if (validationResult.isValid) {
         discount = validationResult.totalDiscount;
 
-        coupon.usageCount++;
-        await coupon.save({ session });
-
-        cart.products = [];
-        cart.coupon = null;
-        await cart.save({ session });
-
-        user.isNewUser = false;
-        await user.save({ session });
       } else {
         await session.abortTransaction();
         session.endSession();
@@ -61,6 +52,16 @@ const createOrder = async (req, res) => {
     });
 
     await order.save({ session });
+    
+    coupon.usageCount++;
+    await coupon.save({ session });
+
+    cart.products = [];
+    cart.coupon = null;
+    await cart.save({ session });
+
+    user.isNewUser = false;
+    await user.save({ session });
 
     await session.commitTransaction();
     session.endSession();
@@ -95,7 +96,7 @@ const getOrderDetails = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id })
+    const orders = await Order.find()
       .populate("products.product")
       .populate("coupon");
     res.json(orders);
