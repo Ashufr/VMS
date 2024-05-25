@@ -24,9 +24,9 @@ const getCategory = async (req, res) => {
 };
 
 const createCategory = async (req, res) => {
-  const { name } = req.body;
+  const { name, description } = req.body;
 
-  const category = new Category({ name });
+  const category = new Category({ name, description });
 
   try {
     const savedCategory = await category.save();
