@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import Cart from "../models/Cart.js";
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -24,8 +26,12 @@ const registerUser = async (req, res) => {
     email,
     password,
   });
-
-  if (user) {
+  const cart = await Cart.create({
+    user: user._id,
+    products: [],
+    coupon: null,
+  })
+  if (user && cart) {
     res.status(201).json({
       _id: user._id,
       email: user.email,
