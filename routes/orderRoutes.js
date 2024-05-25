@@ -9,3 +9,5 @@ router.post("/", protect, createOrder);
 router.get("/:id",protect, getOrderDetails);
 router.get("/", adminProtect, getAllOrders);
 router.get("/user-orders", protect, getAllUserOrders);
+
+export default router;
