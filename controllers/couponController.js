@@ -41,7 +41,6 @@ const getCouponByCode = async (req, res) => {
 };
 
 const createCoupon = async (req, res) => {
-  
   const couponData = req.body;
 
   try {
@@ -65,7 +64,6 @@ const createMultipleCoupons = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
 
 const updateCoupon = async (req, res) => {
   const { id } = req.params;
@@ -172,7 +170,6 @@ const validateCoupon = async (coupon, cart, user) => {
     return { isValid: false, errorMessage: "Coupon valid only for new users" };
   }
 
-  let totalDiscount = 0;
   let totalPrice = 0;
   let applicableCategories = new Set(
     coupon.applicableCategories.map((c) => c.toString())
@@ -188,17 +185,16 @@ const validateCoupon = async (coupon, cart, user) => {
         errorMessage: `Product ${product.name} is not applicable for this coupon`,
       };
     }
+  }
 
-    let discount = 0;
-    if (coupon.discountType === "percentage") {
-      discount = (product.price * item.quantity * coupon.discountValue) / 100;
-    } else if (coupon.discountType === "fixed") {
-      discount = coupon.discountValue * item.quantity;
-    }
-    if (coupon.maxDiscount) {
-      discount = Math.min(discount, coupon.maxDiscount);
-    }
-    totalDiscount += discount;
+  let totalDiscount = 0;
+  if (coupon.discountType === "percentage") {
+    totalDiscount = (totalPrice * coupon.percentageAmount) / 100;
+  } else if (coupon.discountType === "fixed") {
+    totalDiscount =  (totalPrice * coupon.fixedAmount) / 100;
+  }
+  if (coupon.maxDiscount) {
+    totalDiscount = Math.min(discount, coupon.maxDiscount);
   }
 
   if (totalPrice < coupon.minPurchase) {
