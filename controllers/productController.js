@@ -33,6 +33,16 @@ const createProduct = async (req, res) => {
   }
 };
 
+const createMultipleProducts = async (req, res) => {
+  const products = req.body;
+  try {
+    const savedProducts = await Product.insertMany(products);
+    res.status(201).json(savedProducts);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, price, category, description, stock } = req.body;
@@ -78,6 +88,7 @@ export {
   getAllProducts,
   getProduct,
   createProduct,
+  createMultipleProducts,
   updateProduct,
   deleteProduct,
 };
