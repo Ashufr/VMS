@@ -204,7 +204,6 @@ const validateCoupon = async (coupon, cart, user) => {
         "Total purchase amount is less than minimum purchase required for the coupon",
     };
   }
-
   return { isValid: true, totalDiscount, totalPrice };
 };
 

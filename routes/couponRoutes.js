@@ -17,7 +17,7 @@ const router = express.Router();
 router.get("/", getAllCoupons);
 router.get("/:id", getCoupon);
 router.get("/code/:code", getCouponByCode);
-router.get("/validate/:code", protect, validateCouponAndReturnDiscount);
+router.get("/validate/:couponId", protect, validateCouponAndReturnDiscount);
 router.post("/", adminProtect, createCoupon);
 router.post("/multiple", adminProtect, createMultipleCoupons);
 router.put("/:id", adminProtect, updateCoupon);

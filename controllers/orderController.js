@@ -7,25 +7,23 @@ import { validateCoupon } from "./couponController.js";
 const createOrder = async (req, res) => {
   const cartId = req.user.cart;
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const cart = await Cart.findById(cartId)
       .populate("products.product")
-      .session(session);
     if (!cart) {
-      await session.abortTransaction();
-      session.endSession();
       res.status(404).json({ message: "Cart not found" });
       return;
     }
 
-    const coupon = await Coupon.findById(cart.coupon).session(session);
+    const coupon = await Coupon.findById(cart.coupon);
     const user = req.user;
 
     let discount = 0;
     let totalPrice = 0;
+
+    if (cart.products.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
 
     for (let item of cart.products) {
       totalPrice += item.product.price * item.quantity;
@@ -37,8 +35,6 @@ const createOrder = async (req, res) => {
         discount = validationResult.totalDiscount;
 
       } else {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({ message: validationResult.errorMessage });
       }
     }
@@ -51,25 +47,20 @@ const createOrder = async (req, res) => {
       totalPrice: totalPrice - discount,
     });
 
-    await order.save({ session });
+    await order.save();
     
-    coupon.usageCount++;
-    await coupon.save({ session });
-
-    cart.products = [];
+    
     cart.coupon = null;
-    await cart.save({ session });
-
+    await cart.save();
+   
     user.isNewUser = false;
-    await user.save({ session });
+    await user.save();
 
-    await session.commitTransaction();
-    session.endSession();
+  
 
     res.status(201).json(order);
+    cart.products = [];
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     res.status(400).json({ message: error.message });
   }
 };
