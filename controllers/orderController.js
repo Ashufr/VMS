@@ -49,17 +49,15 @@ const createOrder = async (req, res) => {
 
     await order.save();
     
-    
     cart.coupon = null;
+    cart.products = [];
+    cart.products
     await cart.save();
    
     user.isNewUser = false;
     await user.save();
 
-  
-
     res.status(201).json(order);
-    cart.products = [];
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

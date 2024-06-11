@@ -67,36 +67,17 @@ const createMultipleCoupons = async (req, res) => {
 
 const updateCoupon = async (req, res) => {
   const { id } = req.params;
-  const {
-    code,
-    discountType,
-    discountValue,
-    minPurchase,
-    maxDiscount,
-    applicableCategories,
-    newUserOnly,
-    expiryDate,
-  } = req.body;
 
   try {
-    const coupon = await Coupon.findById(id);
+    const coupon = await Coupon.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     if (!coupon) {
       res.status(404).json({ message: "Coupon not found" });
       return;
     }
-
-    coupon.code = code || coupon.code;
-    coupon.discountType = discountType || coupon.discountType;
-    coupon.discountValue = discountValue || coupon.discountValue;
-    coupon.minPurchase = minPurchase || coupon.minPurchase;
-    coupon.maxDiscount = maxDiscount || coupon.maxDiscount;
-    coupon.applicableCategories =
-      applicableCategories || coupon.applicableCategories;
-    coupon.newUserOnly = newUserOnly || coupon.newUserOnly;
-    coupon.expiryDate = expiryDate || coupon.expiryDate;
-
-    const updatedCoupon = await coupon.save();
-    res.json(updatedCoupon);
+    
+    res.json(coupon);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -186,12 +167,13 @@ const validateCoupon = async (coupon, cart, user) => {
       };
     }
   }
-
+  console.log(coupon.amount)
   let totalDiscount = 0;
   if (coupon.discountType === "percentage") {
-    totalDiscount = (totalPrice * coupon.percentageAmount) / 100;
+    totalDiscount = (totalPrice * coupon.amount) / 100;
+    ;
   } else if (coupon.discountType === "fixed") {
-    totalDiscount =  (totalPrice * coupon.fixedAmount) / 100;
+    totalDiscount =  (totalPrice * coupon.amount) / 100;
   }
   if (coupon.maxDiscount) {
     totalDiscount = Math.min(discount, coupon.maxDiscount);

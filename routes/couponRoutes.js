@@ -20,7 +20,7 @@ router.get("/code/:code", getCouponByCode);
 router.get("/validate/:couponId", protect, validateCouponAndReturnDiscount);
 router.post("/", adminProtect, createCoupon);
 router.post("/multiple", adminProtect, createMultipleCoupons);
-router.put("/:id", adminProtect, updateCoupon);
+router.patch("/:id", adminProtect, updateCoupon);
 router.delete("/:id", adminProtect, deleteCoupon);
 
 export default router;
